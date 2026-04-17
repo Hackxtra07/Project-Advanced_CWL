@@ -1,0 +1,190 @@
+atorGUI:
+    def __init__(self):
+        self.generator = SmartHumanPasswordGenerator()
+        self.passwords = set()
+        self.root = tk.Tk()
+        self.root.title("Smart Human Password Generator v2.0")
+        self.root.geometry("1200x800")
+        self.root.configure(bg='#2b2b2b')
+        
+        # Set style
+        self.setup_styles()
+        
+        # Variables
+        self.current_file = None
+        self.generation_in_progress = False
+        
+        # Create GUI
+        self.create_widgets()
+        
+    def setup_styles(self):
+        """Configure ttk styles"""
+        style = ttk.Style()
+        style.theme_use('clam')
+        
+        # Configure colors
+        style.configure('Title.TLabel', background='#2b2b2b', foreground='#4fc3f7', 
+                       font=('Arial', 16, 'bold'))
+        style.configure('Section.TLabel', background='#2b2b2b', foreground='#81c784',
+                       font=('Arial', 12, 'bold'))
+        style.configure('Normal.TLabel', background='#2b2b2b', foreground='#e0e0e0')
+        
+        # Configure buttons
+        style.configure('Primary.TButton', background='#1976d2', foreground='white',
+                       borderwidth=1, focuscolor='none')
+        style.map('Primary.TButton',
+                 background=[('active', '#1565c0')],
+                 foreground=[('active', 'white')])
+        
+        style.configure('Success.TButton', background='#388e3c', foreground='white')
+        style.map('Success.TButton',
+                 background=[('active', '#2e7d32')])
+        
+        style.configure('Info.TButton', background='#0288d1', foreground='white')
+        style.map('Info.TButton',
+                 background=[('active', '#0277bd')])
+        
+        # Configure entries
+        style.configure('Custom.TEntry', fieldbackground='#424242', foreground='white',
+                       borderwidth=2, relief='solid')
+        
+        # Configure checkbuttons
+        style.configure('Custom.TCheckbutton', background='#2b2b2b', foreground='#e0e0e0')
+        
+    def create_widgets(self):
+        """Create all GUI widgets"""
+        # Main container
+        main_container = ttk.Frame(self.root)
+        main_container.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Title
+        title_frame = ttk.Frame(main_container)
+        title_frame.pack(fill=tk.X, pady=(0, 20))
+        
+        ttk.Label(title_frame, text="🔒 SMART HUMAN PASSWORD GENERATOR", 
+                 style='Title.TLabel').pack()
+        ttk.Label(title_frame, text="Generate realistic password patterns humans actually use", 
+                 style='Normal.TLabel').pack()
+        
+        # Create notebook for tabs
+        notebook = ttk.Notebook(main_container)
+        notebook.pack(fill=tk.BOTH, expand=True)
+        
+        # Tab 1: Personal Information
+        self.create_personal_info_tab(notebook)
+        
+        # Tab 2: Options
+        self.create_options_tab(notebook)
+        
+        # Tab 3: Output
+        self.create_output_tab(notebook)
+        
+        # Status bar
+        self.create_status_bar(main_container)
+        
+    def create_personal_info_tab(self, notebook):
+        """Create the personal information tab"""
+        tab1 = ttk.Frame(notebook)
+        notebook.add(tab1, text="Personal Information")
+        
+        # Create scrollable frame
+        canvas = tk.Canvas(tab1, bg='#2b2b2b', highlightthickness=0)
+        scrollbar = ttk.Scrollbar(tab1, orient="vertical", command=canvas.yview)
+        scrollable_frame = ttk.Frame(canvas)
+        
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        canvas.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+        
+        # Required Information Section
+        required_frame = ttk.LabelFrame(scrollable_frame, text="Required Information", padding=15)
+        required_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        ttk.Label(required_frame, text="First Name:", style='Section.TLabel').grid(row=0, column=0, sticky=tk.W, pady=5)
+        self.first_name_var = tk.StringVar()
+        ttk.Entry(required_frame, textvariable=self.first_name_var, width=30, style='Custom.TEntry').grid(row=0, column=1, padx=10, pady=5)
+        
+        ttk.Label(required_frame, text="Last Name:", style='Section.TLabel').grid(row=1, column=0, sticky=tk.W, pady=5)
+        self.last_name_var = tk.StringVar()
+        ttk.Entry(required_frame, textvariable=self.last_name_var, width=30, style='Custom.TEntry').grid(row=1, column=1, padx=10, pady=5)
+        
+        ttk.Label(required_frame, text="Birth Date:", style='Section.TLabel').grid(row=2, column=0, sticky=tk.W, pady=5)
+        self.birth_date_var = tk.StringVar()
+        ttk.Entry(required_frame, textvariable=self.birth_date_var, width=30, style='Custom.TEntry').grid(row=2, column=1, padx=10, pady=5)
+        ttk.Label(required_frame, text="Format: DDMMYYYY or DD/MM/YYYY", 
+                 style='Normal.TLabel').grid(row=2, column=2, padx=10, pady=5)
+        
+        # Optional Information Section
+        optional_frame = ttk.LabelFrame(scrollable_frame, text="Optional Information", padding=15)
+        optional_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        ttk.Label(optional_frame, text="Nickname:", style='Section.TLabel').grid(row=0, column=0, sticky=tk.W, pady=5)
+        self.nickname_var = tk.StringVar()
+        ttk.Entry(optional_frame, textvariable=self.nickname_var, width=30, style='Custom.TEntry').grid(row=0, column=1, padx=10, pady=5)
+        
+        ttk.Label(optional_frame, text="Spouse Name:", style='Section.TLabel').grid(row=1, column=0, sticky=tk.W, pady=5)
+        self.spouse_name_var = tk.StringVar()
+        ttk.Entry(optional_frame, textvariable=self.spouse_name_var, width=30, style='Custom.TEntry').grid(row=1, column=1, padx=10, pady=5)
+        
+        ttk.Label(optional_frame, text="Child Name:", style='Section.TLabel').grid(row=2, column=0, sticky=tk.W, pady=5)
+        self.child_name_var = tk.StringVar()
+        ttk.Entry(optional_frame, textvariable=self.child_name_var, width=30, style='Custom.TEntry').grid(row=2, column=1, padx=10, pady=5)
+        
+        ttk.Label(optional_frame, text="Pet Name:", style='Section.TLabel').grid(row=3, column=0, sticky=tk.W, pady=5)
+        self.pet_name_var = tk.StringVar()
+        ttk.Entry(optional_frame, textvariable=self.pet_name_var, width=30, style='Custom.TEntry').grid(row=3, column=1, padx=10, pady=5)
+        
+        # Location Information
+        location_frame = ttk.LabelFrame(scrollable_frame, text="Location Information", padding=15)
+        location_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        ttk.Label(location_frame, text="City:", style='Section.TLabel').grid(row=0, column=0, sticky=tk.W, pady=5)
+        self.city_var = tk.StringVar()
+        ttk.Entry(location_frame, textvariable=self.city_var, width=30, style='Custom.TEntry').grid(row=0, column=1, padx=10, pady=5)
+        
+        ttk.Label(location_frame, text="Hometown:", style='Section.TLabel').grid(row=1, column=0, sticky=tk.W, pady=5)
+        self.hometown_var = tk.StringVar()
+        ttk.Entry(location_frame, textvariable=self.hometown_var, width=30, style='Custom.TEntry').grid(row=1, column=1, padx=10, pady=5)
+        
+        # Work & Education
+        work_frame = ttk.LabelFrame(scrollable_frame, text="Work & Education", padding=15)
+        work_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        ttk.Label(work_frame, text="Company:", style='Section.TLabel').grid(row=0, column=0, sticky=tk.W, pady=5)
+        self.company_var = tk.StringVar()
+        ttk.Entry(work_frame, textvariable=self.company_var, width=30, style='Custom.TEntry').grid(row=0, column=1, padx=10, pady=5)
+        
+        ttk.Label(work_frame, text="School:", style='Section.TLabel').grid(row=1, column=0, sticky=tk.W, pady=5)
+        self.school_var = tk.StringVar()
+        ttk.Entry(work_frame, textvariable=self.school_var, width=30, style='Custom.TEntry').grid(row=1, column=1, padx=10, pady=5)
+        
+        # Interests
+        interests_frame = ttk.LabelFrame(scrollable_frame, text="Interests & Hobbies", padding=15)
+        interests_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        ttk.Label(interests_frame, text="Favorite Sport:", style='Section.TLabel').grid(row=0, column=0, sticky=tk.W, pady=5)
+        self.sport_var = tk.StringVar()
+        ttk.Entry(interests_frame, textvariable=self.sport_var, width=30, style='Custom.TEntry').grid(row=0, column=1, padx=10, pady=5)
+        
+        ttk.Label(interests_frame, text="Favorite Team:", style='Section.TLabel').grid(row=1, column=0, sticky=tk.W, pady=5)
+        self.team_var = tk.StringVar()
+        ttk.Entry(interests_frame, textvariable=self.team_var, width=30, style='Custom.TEntry').grid(row=1, column=1, padx=10, pady=5)
+        
+        ttk.Label(interests_frame, text="Favorite Movie:", style='Section.TLabel').grid(row=2, column=0, sticky=tk.W, pady=5)
+        self.movie_var = tk.StringVar()
+        ttk.Entry(interests_frame, textvariable=self.movie_var, width=30, style='Custom.TEntry').grid(row=2, column=1, padx=10, pady=5)
+        
+        ttk.Label(interests_frame, text="Favorite Music/Artist:", style='Section.TLabel').grid(row=3, column=0, sticky=tk.W, pady=5)
+        self.music_var = tk.StringVar()
+        ttk.Entry(interests_frame, textvariable=self.music_var, width=30, style='Custom.TEntry').grid(row=3, column=1, padx=10, pady=5)
+        
+        ttk.Label(interests_frame, text="Favorite Book/Author:", style='Section.TLabel').grid(row=4, column=0, sticky=tk.W, pady=5)
+        self.book_var = tk.StringVar()
+        ttk.Entry(interests_frame, textvariable=self.book_var, width=30, style='Custom.TEntry').grid(

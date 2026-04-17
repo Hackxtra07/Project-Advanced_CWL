@@ -1,0 +1,165 @@
+row=4, column=1, padx=10, pady=5)
+        
+        ttk.Label(interests_frame, text="Favorite Game/Character:", style='Section.TLabel').grid(row=5, column=0, sticky=tk.W, pady=5)
+        self.game_var = tk.StringVar()
+        ttk.Entry(interests_frame, textvariable=self.game_var, width=30, style='Custom.TEntry').grid(row=5, column=1, padx=10, pady=5)
+        
+        ttk.Label(interests_frame, text="Favorite Celebrity:", style='Section.TLabel').grid(row=6, column=0, sticky=tk.W, pady=5)
+        self.celebrity_var = tk.StringVar()
+        ttk.Entry(interests_frame, textvariable=self.celebrity_var, width=30, style='Custom.TEntry').grid(row=6, column=1, padx=10, pady=5)
+        
+        ttk.Label(interests_frame, text="Favorite Place/Travel:", style='Section.TLabel').grid(row=7, column=0, sticky=tk.W, pady=5)
+        self.place_var = tk.StringVar()
+        ttk.Entry(interests_frame, textvariable=self.place_var, width=30, style='Custom.TEntry').grid(row=7, column=1, padx=10, pady=5)
+        
+        ttk.Label(interests_frame, text="Hobby/Activity:", style='Section.TLabel').grid(row=8, column=0, sticky=tk.W, pady=5)
+        self.hobby_var = tk.StringVar()
+        ttk.Entry(interests_frame, textvariable=self.hobby_var, width=30, style='Custom.TEntry').grid(row=8, column=1, padx=10, pady=5)
+        
+        ttk.Label(interests_frame, text="Lucky Number/Dates:", style='Section.TLabel').grid(row=9, column=0, sticky=tk.W, pady=5)
+        self.lucky_num_var = tk.StringVar()
+        ttk.Entry(interests_frame, textvariable=self.lucky_num_var, width=30, style='Custom.TEntry').grid(row=9, column=1, padx=10, pady=5)
+        
+        # Example presets
+        presets_frame = ttk.LabelFrame(scrollable_frame, text="Quick Presets", padding=15)
+        presets_frame.pack(fill=tk.X, padx=10, pady=10)
+        
+        ttk.Button(presets_frame, text="Example: John Doe", 
+                  command=lambda: self.load_preset("john"), 
+                  style='Info.TButton').pack(side=tk.LEFT, padx=5)
+        ttk.Button(presets_frame, text="Example: Sarah Smith", 
+                  command=lambda: self.load_preset("sarah"), 
+                  style='Info.TButton').pack(side=tk.LEFT, padx=5)
+        ttk.Button(presets_frame, text="Example: Manan Kamboj", 
+                  command=lambda: self.load_preset("manan"), 
+                  style='Info.TButton').pack(side=tk.LEFT, padx=5)
+        ttk.Button(presets_frame, text="Clear All", 
+                  command=self.clear_all_fields, 
+                  style='Primary.TButton').pack(side=tk.LEFT, padx=5)
+        
+    def create_options_tab(self, notebook):
+        """Create the options tab with scrollbar"""
+        tab2 = ttk.Frame(notebook)
+        notebook.add(tab2, text="Generation Options")
+        
+        # Create canvas and scrollbar for scrollable content
+        canvas = tk.Canvas(tab2, bg="#2b2b2b", highlightthickness=0)
+        scrollbar = ttk.Scrollbar(tab2, orient=tk.VERTICAL, command=canvas.yview)
+        scrollable_frame = ttk.Frame(canvas)
+        
+        # Configure canvas scrolling
+        scrollable_frame.bind(
+            "<Configure>",
+            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+        )
+        
+        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
+        canvas.configure(yscrollcommand=scrollbar.set)
+        
+        # Pack canvas and scrollbar
+        canvas.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        
+        # Bind mousewheel scrolling
+        def _on_mousewheel(event):
+            canvas.yview_scroll(int(-1*(event.delta/120)), "units")
+        canvas.bind_all("<MouseWheel>", _on_mousewheel)
+        
+        # Options frame inside scrollable area
+        options_frame = ttk.LabelFrame(scrollable_frame, text="Password Generation Options", padding=20)
+        options_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Generation settings
+        settings_frame = ttk.Frame(options_frame)
+        settings_frame.pack(fill=tk.X, pady=10)
+        
+        # Checkboxes
+        self.use_specials_var = tk.BooleanVar(value=True)
+        self.use_leet_var = tk.BooleanVar(value=False)
+        self.use_numbers_var = tk.BooleanVar(value=True)
+        self.use_family_var = tk.BooleanVar(value=True)
+        self.use_location_var = tk.BooleanVar(value=False)
+        self.use_interests_var = tk.BooleanVar(value=False)
+        
+        ttk.Checkbutton(settings_frame, text="Add special characters", 
+                       variable=self.use_specials_var, style='Custom.TCheckbutton').grid(row=0, column=0, sticky=tk.W, pady=5)
+        ttk.Checkbutton(settings_frame, text="Add leet speak variations", 
+                       variable=self.use_leet_var, style='Custom.TCheckbutton').grid(row=0, column=1, sticky=tk.W, pady=5, padx=20)
+        ttk.Checkbutton(settings_frame, text="Add common number patterns", 
+                       variable=self.use_numbers_var, style='Custom.TCheckbutton').grid(row=1, column=0, sticky=tk.W, pady=5)
+        ttk.Checkbutton(settings_frame, text="Include family information", 
+                       variable=self.use_family_var, style='Custom.TCheckbutton').grid(row=1, column=1, sticky=tk.W, pady=5, padx=20)
+        ttk.Checkbutton(settings_frame, text="Include location information", 
+                       variable=self.use_location_var, style='Custom.TCheckbutton').grid(row=2, column=0, sticky=tk.W, pady=5)
+        ttk.Checkbutton(settings_frame, text="Include interests", 
+                       variable=self.use_interests_var, style='Custom.TCheckbutton').grid(row=2, column=1, sticky=tk.W, pady=5, padx=20)
+        
+        # Special characters selection
+        specials_frame = ttk.LabelFrame(options_frame, text="Special Characters", padding=10)
+        specials_frame.pack(fill=tk.X, pady=10)
+        
+        self.specials_var = tk.StringVar(value='!@#$%&*')
+        ttk.Label(specials_frame, text="Characters to use:", style='Normal.TLabel').pack(side=tk.LEFT, padx=5)
+        ttk.Entry(specials_frame, textvariable=self.specials_var, width=20, style='Custom.TEntry').pack(side=tk.LEFT, padx=5)
+        ttk.Label(specials_frame, text="(e.g., !@#$%^&*)", style='Normal.TLabel').pack(side=tk.LEFT, padx=5)
+        
+        # Length constraints
+        length_frame = ttk.LabelFrame(options_frame, text="Password Length", padding=10)
+        length_frame.pack(fill=tk.X, pady=10)
+        
+        ttk.Label(length_frame, text="Minimum:", style='Normal.TLabel').pack(side=tk.LEFT, padx=5)
+        self.min_length_var = tk.StringVar(value='6')
+        ttk.Spinbox(length_frame, from_=4, to=32, textvariable=self.min_length_var, width=5).pack(side=tk.LEFT, padx=5)
+        
+        ttk.Label(length_frame, text="Maximum:", style='Normal.TLabel').pack(side=tk.LEFT, padx=5)
+        self.max_length_var = tk.StringVar(value='20')
+        ttk.Spinbox(length_frame, from_=6, to=64, textvariable=self.max_length_var, width=5).pack(side=tk.LEFT, padx=5)
+        
+        # Max passwords
+        max_frame = ttk.LabelFrame(options_frame, text="Output Limits", padding=10)
+        max_frame.pack(fill=tk.X, pady=10)
+        
+        ttk.Label(max_frame, text="Max passwords to generate:", style='Normal.TLabel').pack(side=tk.LEFT, padx=5)
+        self.max_passwords_var = tk.StringVar(value='5000')
+        ttk.Spinbox(max_frame, from_=100, to=50000, increment=100, 
+                   textvariable=self.max_passwords_var, width=10).pack(side=tk.LEFT, padx=5)
+        
+        # Pattern intensity
+        pattern_frame = ttk.LabelFrame(options_frame, text="Pattern Intensity", padding=10)
+        pattern_frame.pack(fill=tk.X, pady=10)
+        
+        self.pattern_intensity_var = tk.IntVar(value=2)
+        ttk.Label(pattern_frame, text="Simple", style='Normal.TLabel').pack(side=tk.LEFT, padx=5)
+        ttk.Radiobutton(pattern_frame, variable=self.pattern_intensity_var, value=1).pack(side=tk.LEFT)
+        ttk.Radiobutton(pattern_frame, variable=self.pattern_intensity_var, value=2).pack(side=tk.LEFT)
+        ttk.Radiobutton(pattern_frame, variable=self.pattern_intensity_var, value=3).pack(side=tk.LEFT)
+        ttk.Radiobutton(pattern_frame, variable=self.pattern_intensity_var, value=4).pack(side=tk.LEFT)
+        ttk.Radiobutton(pattern_frame, variable=self.pattern_intensity_var, value=5).pack(side=tk.LEFT)
+        ttk.Label(pattern_frame, text="Complex", style='Normal.TLabel').pack(side=tk.LEFT, padx=5)
+        
+        # ==================== ADVANCED OPTIONS ====================
+        advanced_frame = ttk.LabelFrame(options_frame, text="🔐 Advanced Security Options", padding=15)
+        advanced_frame.pack(fill=tk.X, pady=15)
+        
+        # Advanced checkboxes
+        self.exclude_similar_var = tk.BooleanVar(value=False)
+        self.require_uppercase_var = tk.BooleanVar(value=False)
+        self.require_lowercase_var = tk.BooleanVar(value=True)
+        self.require_digits_var = tk.BooleanVar(value=False)
+        self.require_special_var = tk.BooleanVar(value=False)
+        self.exclude_sequential_var = tk.BooleanVar(value=False)
+        self.avoid_repeats_var = tk.BooleanVar(value=False)
+        
+        advanced_row1 = ttk.Frame(advanced_frame)
+        advanced_row1.pack(fill=tk.X, pady=5)
+        
+        ttk.Checkbutton(advanced_row1, text="Exclude similar chars (i,l,1,L,o,0,O)", 
+                       variable=self.exclude_similar_var, style='Custom.TCheckbutton').pack(side=tk.LEFT, padx=10)
+        ttk.Checkbutton(advanced_row1, text="Require UPPERCASE letters", 
+                       variable=self.require_uppercase_var, style='Custom.TCheckbutton').pack(side=tk.LEFT, padx=10)
+        
+        advanced_row2 = ttk.Frame(advanced_frame)
+        advanced_row2.pack(fill=tk.X, pady=5)
+        
+        ttk.Checkbutton(advanced_row2, text="Require lowercase letters", 
+                       variable=self.require_lowercase_var, style='Custom.TCheckbutton').pack(side=tk.L

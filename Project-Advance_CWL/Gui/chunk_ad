@@ -1,0 +1,251 @@
+ords.add(f"{first_name}{last_name}{last_name}{year}")
+        passwords.add(f"{first_name}{first_name}{last_name}{year}")
+        
+        # Example 4: With separators
+        passwords.add(f"{first_name}.{last_name}{year_short}")
+        passwords.add(f"{first_name}_{last_name}{year}")
+        passwords.add(f"{first_name}{last_name}@{year_short}")
+        
+        # Example 5: Mixed patterns
+        passwords.add(f"{first_name}{year}{last_name}")
+        passwords.add(f"{year_short}{first_name}{last_name}")
+        passwords.add(f"{first_name}{last_name[0]}{year}")
+        
+        # Example 6: Simple combinations
+        passwords.add(f"{first_name}{last_name}")
+        passwords.add(f"{last_name}{first_name}")
+        passwords.add(f"{first_name[0]}{last_name}")
+        passwords.add(f"{first_name}{last_name[0]}")
+        
+        # Example 7: With common endings
+        passwords.add(f"{first_name}{last_name}123")
+        passwords.add(f"{first_name}{last_name}!23")
+        passwords.add(f"{first_name}{last_name}@123")
+        
+    def add_number_variations(self, passwords: Set[str], date_info: Dict) -> Set[str]:
+        """Add intelligent number variations"""
+        new_passwords = set()
+        
+        day = date_info.get('day', '')
+        month = date_info.get('month', '')
+        year = date_info.get('year', '')
+        year_short = date_info.get('year_short', '')
+        
+        # Date combinations people commonly use
+        date_combinations = []
+        if day and month:
+            date_combinations.append(f"{day}{month}")
+            date_combinations.append(f"{month}{day}")
+        
+        if day and month and year_short:
+            date_combinations.append(f"{day}{month}{year_short}")
+            date_combinations.append(f"{month}{day}{year_short}")
+        
+        if year:
+            date_combinations.append(year)
+        
+        if year_short:
+            date_combinations.append(year_short)
+        
+        # Add date combinations to existing passwords
+        for pwd in list(passwords)[:100]:  # Limit to avoid explosion
+            for date_combo in date_combinations[:3]:  # First 3 date combos
+                # Add date at end
+                new_passwords.add(pwd + date_combo)
+                # Add date at beginning
+                new_passwords.add(date_combo + pwd)
+                
+                # If password already has some numbers, replace them
+                if any(char.isdigit() for char in pwd):
+                    # Try to replace the last numbers with date
+                    num_match = re.search(r'\d+$', pwd)
+                    if num_match:
+                        new_pwd = pwd[:num_match.start()] + date_combo
+                        new_passwords.add(new_pwd)
+        
+        # Add common number patterns
+        for pwd in list(passwords)[:50]:
+            for num in self.common_numbers[:5]:
+                new_passwords.add(pwd + num)
+                
+                # Insert number in the middle for passwords with separators
+                if len(pwd) > 5 and ('_' in pwd or '.' in pwd or '-' in pwd):
+                    parts = re.split(r'[._-]', pwd)
+                    if len(parts) == 2:
+                        new_passwords.add(parts[0] + num + parts[1])
+        
+        return new_passwords
+    
+    def add_special_variations(self, passwords: Set[str], specials: List[str]) -> Set[str]:
+        """Add special characters in human-like ways"""
+        new_passwords = set()
+        
+        for pwd in list(passwords)[:200]:  # Limit
+            new_passwords.add(pwd)  # Keep original
+            
+            for special in specials[:3]:  # Most common specials
+                # Add at end
+                new_passwords.add(pwd + special)
+                
+                # Add at beginning
+                new_passwords.add(special + pwd)
+                
+                # Add at both ends
+                new_passwords.add(special + pwd + special)
+                
+                # Replace spaces/separators with specials
+                if ' ' in pwd:
+                    new_passwords.add(pwd.replace(' ', special))
+                
+                # Insert in the middle for longer passwords
+                if len(pwd) > 8:
+                    mid = len(pwd) // 2
+                    new_passwords.add(pwd[:mid] + special + pwd[mid:])
+        
+        return new_passwords
+    
+    def add_leet_variations(self, passwords: Set[str]) -> Set[str]:
+        """Add leet speak variations (only common ones)"""
+        new_passwords = set()
+        
+        for pwd in list(passwords)[:100]:  # Limit
+            new_passwords.add(pwd)  # Keep original
+            
+            # Only apply leet to some passwords (30% chance)
+            if random.random() < 0.3:
+                leet_pwd = pwd
+                
+                # Apply common leet substitutions
+                for char, subs in self.leet_map.items():
+                    if char in leet_pwd.lower():
+                        # Replace only one occurrence (not all)
+                        if random.random() < 0.5:
+                            leet_pwd = leet_pwd.replace(char, random.choice(subs))
+                            leet_pwd = leet_pwd.replace(char.upper(), random.choice(subs))
+                
+                if leet_pwd != pwd:
+                    new_passwords.add(leet_pwd)
+        
+        return new_passwords
+    
+    def generate_common_passwords(self, first_name: str, last_name: str, date_info: Dict) -> Set[str]:
+        """Generate common password patterns"""
+        passwords = set()
+        
+        if not first_name or not last_name:
+            return passwords
+        
+        # Very common patterns
+        passwords.add(f"{first_name}123")
+        passwords.add(f"{first_name}1234")
+        passwords.add(f"{last_name}123")
+        passwords.add(f"{first_name}{last_name[0]}123")
+        
+        # With special characters
+        passwords.add(f"{first_name}!23")
+        passwords.add(f"{first_name}@123")
+        passwords.add(f"{first_name}#123")
+        
+        # Year patterns
+        year = date_info.get('year', '')
+        year_short = date_info.get('year_short', '')
+        
+        if year:
+            passwords.add(f"{first_name}{year}")
+            passwords.add(f"{last_name}{year}")
+            passwords.add(f"{first_name}{last_name[0]}{year_short}")
+        
+        # Simple combinations
+        passwords.add(first_name.lower())
+        passwords.add(first_name.title())
+        passwords.add(last_name.lower())
+        passwords.add(last_name.title())
+        
+        return passwords
+    
+    def analyze_and_filter(self, passwords: Set[str], min_len: int = 6, max_len: int = 20) -> Set[str]:
+        """Analyze and filter passwords"""
+        filtered = set()
+        
+        print("\n[*] Analyzing and filtering passwords...")
+        
+        # Count patterns
+        pattern_stats = defaultdict(int)
+        
+        for pwd in passwords:
+            # Length check
+            if not (min_len <= len(pwd) <= max_len):
+                continue
+            
+            # Remove unrealistic patterns
+            # Too many consecutive specials
+            if re.search(r'[!@#$%^&*]{3,}', pwd):
+                continue
+            
+            # Too many consecutive numbers
+            if re.search(r'\d{6,}', pwd):
+                continue
+            
+            # Must have at least one letter
+            if not re.search(r'[a-zA-Z]', pwd):
+                continue
+            
+            # Categorize pattern
+            if pwd.islower():
+                pattern_stats['all_lowercase'] += 1
+            elif pwd.isupper():
+                pattern_stats['all_uppercase'] += 1
+            elif pwd[0].isupper():
+                pattern_stats['first_capital'] += 1
+            elif pwd.title() == pwd:
+                pattern_stats['title_case'] += 1
+            
+            if any(c in pwd for c in '!@#$%^&*'):
+                pattern_stats['has_special'] += 1
+            
+            if re.search(r'\d', pwd):
+                pattern_stats['has_numbers'] += 1
+            
+            filtered.add(pwd)
+        
+        # Print statistics
+        print(f"\n[+] Pattern Statistics:")
+        print(f"    Total generated: {len(passwords)}")
+        print(f"    After filtering: {len(filtered)}")
+        
+        if filtered:
+            print(f"\n    Pattern distribution:")
+            for pattern, count in sorted(pattern_stats.items()):
+                percentage = (count / len(filtered)) * 100
+                print(f"      {pattern:20}: {count:6} ({percentage:5.1f}%)")
+        
+        return filtered
+    
+    def apply_advanced_filters(self, passwords: Set[str], options: Dict) -> Set[str]:
+        """Apply advanced filtering based on user options"""
+        filtered = set()
+        
+        similar_chars = set('il1Lo0O') if options.get('exclude_similar', False) else set()
+        exclude_sequential = options.get('exclude_sequential', False)
+        avoid_repeats = options.get('avoid_repeats', False)
+        require_uppercase = options.get('require_uppercase', False)
+        require_lowercase = options.get('require_lowercase', False)
+        require_digits = options.get('require_digits', False)
+        require_special = options.get('require_special', False)
+        min_strength = options.get('min_strength', 0)
+        max_repeat = int(options.get('max_repeat', 3))
+        min_uppercase = int(options.get('min_uppercase', 0))
+        min_digits = int(options.get('min_digits', 0))
+        min_special = int(options.get('min_special', 0))
+        
+        for pwd in passwords:
+            # Exclude similar characters check
+            if similar_chars and any(c in pwd for c in similar_chars):
+                continue
+            
+            # Sequential numbers check
+            if exclude_sequential:
+                if self._contains_sequential(pwd):
+                    continue
+            
+            # Re
