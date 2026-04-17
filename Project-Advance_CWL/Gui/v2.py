@@ -1064,6 +1064,33 @@ class SmartHumanPasswordGenerator:
             if count > max_allowed:
                 return True
         return False
+
+    def calculate_complexity(self, password: str) -> int:
+        """Calculate password complexity score (1-10)"""
+        score = 0
+        
+        # Length score
+        if len(password) >= 12:
+            score += 3
+        elif len(password) >= 8:
+            score += 2
+        elif len(password) >= 6:
+            score += 1
+        
+        # Character variety
+        if any(c.isupper() for c in password):
+            score += 1
+        if any(c.islower() for c in password):
+            score += 1
+        if any(c.isdigit() for c in password):
+            score += 1
+        if any(c in '!@#$%^&*' for c in password):
+            score += 2
+            
+        if re.search(r'\d{4,}$', password):  # Long number sequence at end
+            score += 1
+            
+        return min(max(score, 1), 10)
     
     def show_examples(self, passwords: Set[str], count: int = 20):
         """Show example passwords"""
